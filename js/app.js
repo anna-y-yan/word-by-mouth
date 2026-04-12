@@ -190,6 +190,9 @@ const recipes = [
   },
 ];
 
+// Initialize photos array on seed recipes
+recipes.forEach(r => { r.photos = []; });
+
 // ── State ─────────────────────────────────────────────────────────────────────
 
 let uploadedPhotos = [];
@@ -197,30 +200,68 @@ let importedRecipe = null;
 
 // ── Render ────────────────────────────────────────────────────────────────────
 
+function getPlaceholderColor(title) {
+  const palette = ['#A8705C', '#6A9478', '#B08B5A', '#7A6EA0', '#5A8DA8', '#A86878', '#6A9268', '#9E7A58'];
+  let hash = 0;
+  for (let i = 0; i < title.length; i++) hash = (hash << 5) - hash + title.charCodeAt(i);
+  return palette[Math.abs(hash) % palette.length];
+}
+
 function renderRecipes(recipesToShow = recipes) {
   const grid = document.getElementById('recipeGrid');
-  grid.innerHTML = recipesToShow.map(recipe => `
-    <div class="recipe-card" onclick="openRecipeDetail(${recipe.id})">
-      <div class="recipe-image"></div>
-      <div class="recipe-content">
-        <h3 class="recipe-title">${recipe.title}</h3>
-        <div class="recipe-meta">
-          <div class="meta-item">${recipe.time}</div>
-          <div class="rating-display">
-            <span class="star">★</span>
-            <span class="rating-text">${recipe.rating}</span>
-          </div>
-        </div>
-        <div class="recipe-author">
+  grid.innerHTML = recipesToShow.map(recipe => {
+    const topComment = recipe.comments[0] || null;
+    const photoUrl = recipe.photos && recipe.photos.length > 0 ? recipe.photos[0] : null;
+    const placeholderColor = getPlaceholderColor(recipe.title);
+
+    return `
+      <div class="feed-card" onclick="openRecipeDetail(${recipe.id})">
+
+        <div class="feed-card-header">
           <div class="author-avatar">${recipe.authorInitials}</div>
           <div class="author-info">
-            <span class="author-name">${recipe.author}</span>
-            ${recipe.isFriend ? '<span class="friend-tag">Friend</span>' : ''}
+            <div class="author-name">
+              ${recipe.author}
+              ${recipe.isFriend ? '<span class="friend-tag">Friend</span>' : ''}
+            </div>
+            <div class="feed-card-tags">
+              ${recipe.status === 'wantToTry' ? '<span class="status-tag want">Want to Try</span>' : ''}
+              ${recipe.status === 'alreadyCooked' ? '<span class="status-tag cooked">Cooked</span>' : ''}
+            </div>
           </div>
+          ${recipe.source ? `<span class="recipe-source-tag">${recipe.source}</span>` : ''}
         </div>
+
+        <div class="feed-photo" style="${!photoUrl ? `background-color: ${placeholderColor};` : ''}">
+          ${photoUrl
+            ? `<img src="${photoUrl}" class="feed-photo-img" alt="${recipe.title}">`
+            : `<span class="feed-photo-placeholder-text">${recipe.title}</span>`
+          }
+        </div>
+
+        <div class="feed-card-body">
+          <div class="feed-title-row">
+            <h3 class="feed-recipe-title">${recipe.title}</h3>
+            <div class="feed-recipe-meta">
+              ${recipe.time && recipe.time !== 'N/A' ? `<span class="meta-item">${recipe.time}</span>` : ''}
+              ${recipe.rating > 0 ? `<span class="rating-display"><span class="star">★</span><span class="rating-text">${recipe.rating}</span></span>` : ''}
+            </div>
+          </div>
+
+          ${topComment ? `
+            <div class="feed-note">
+              <p class="feed-note-text">"${topComment.text}"</p>
+              <div class="feed-note-footer">
+                ${topComment.rating > 0 ? `<span class="feed-note-stars">${'★'.repeat(topComment.rating)}</span>` : ''}
+                <span class="feed-note-author">— ${topComment.author}</span>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 // ── Recipe Detail Modal ───────────────────────────────────────────────────────
@@ -230,6 +271,7 @@ function openRecipeDetail(id) {
   if (!recipe) return;
 
   document.getElementById('modalTitle').textContent = recipe.title;
+  document.getElementById('modalSubtitle').textContent = recipe.source || '';
   document.getElementById('modalBody').innerHTML = `
     <div class="recipe-detail-image"></div>
 
@@ -299,6 +341,7 @@ function openAddRecipe() {
   importedRecipe = null;
 
   document.getElementById('modalTitle').textContent = 'Add Recipe';
+  document.getElementById('modalSubtitle').textContent = '';
   document.getElementById('modalBody').innerHTML = `
     <div class="upload-section">
       <h4>Import from URL</h4>
@@ -334,7 +377,7 @@ function openAddRecipe() {
 
     <div class="action-buttons">
       <button class="action-btn" onclick="closeModal()">Cancel</button>
-      <button class="action-btn primary" id="saveRecipeBtn" disabled>Save Recipe</button>
+      <button class="action-btn primary" id="saveRecipeBtn" disabled onclick="saveImportedRecipe()">Save Recipe</button>
     </div>
   `;
 
@@ -395,7 +438,52 @@ function removePhoto(index) {
 
 // ── URL Import ────────────────────────────────────────────────────────────────
 
-function importRecipe() {
+function normalizeRecipeUrl(url) {
+  try {
+    const u = new URL(url);
+    return (u.hostname + u.pathname).toLowerCase().replace(/\/$/, '');
+  } catch (_) {
+    return url.toLowerCase();
+  }
+}
+
+function urlToId(url) {
+  const s = normalizeRecipeUrl(url);
+  let hash = 5381;
+  for (let i = 0; i < s.length; i++) {
+    hash = (((hash << 5) + hash) ^ s.charCodeAt(i)) >>> 0;
+  }
+  return hash;
+}
+
+function getSourceName(hostname, schemaPublisher) {
+  if (schemaPublisher) return schemaPublisher;
+  const map = {
+    'cooking.nytimes.com': 'NYT Cooking',
+    'nytimes.com': 'NYT Cooking',
+    'allrecipes.com': 'AllRecipes',
+    'seriouseats.com': 'Serious Eats',
+    'bonappetit.com': 'Bon Appétit',
+    'epicurious.com': 'Epicurious',
+    'foodnetwork.com': 'Food Network',
+    'bromabakery.com': 'Broma Bakery',
+    'smittenkitchen.com': 'Smitten Kitchen',
+    'thekitchn.com': 'The Kitchn',
+    'food52.com': 'Food52',
+    'delish.com': 'Delish',
+    'tasty.co': 'Tasty',
+    'halfbakedharvest.com': 'Half Baked Harvest',
+    'minimalistbaker.com': 'Minimalist Baker',
+    'cookieandkate.com': 'Cookie and Kate',
+    'sallysbakingaddiction.com': "Sally's Baking Addiction",
+  };
+  const h = hostname.replace(/^www\./, '');
+  if (map[h]) return map[h];
+  const name = h.split('.')[0];
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+async function importRecipe() {
   const url = document.getElementById('recipeUrl').value.trim();
 
   if (!url) {
@@ -403,60 +491,269 @@ function importRecipe() {
     return;
   }
 
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(url);
+  } catch (_) {
+    alert('Please enter a valid URL (include https://)');
+    return;
+  }
+
+  const importBtn = document.querySelector('.import-btn');
+  importBtn.disabled = true;
+
   const loadingArea = document.getElementById('loadingArea');
   loadingArea.innerHTML = `
     <div class="loading-state">
       <div class="spinner"></div>
-      <span class="loading-text">Importing recipe from URL...</span>
+      <span class="loading-text">Fetching recipe from ${parsedUrl.hostname}...</span>
     </div>
   `;
 
-  // Simulated import — replace with a real API call when backend is ready
-  setTimeout(() => {
-    let hostname = url;
-    try { hostname = new URL(url).hostname; } catch (_) { /* keep raw value */ }
+  document.getElementById('recipePreviewArea').innerHTML = '';
+  document.getElementById('saveRecipeBtn').disabled = true;
 
-    importedRecipe = {
-      title: `Imported Recipe from ${hostname}`,
-      ingredients: [
-        '2 cups flour',
-        '1 cup sugar',
-        '1/2 cup butter',
-        '2 eggs',
-        '1 tsp vanilla extract',
-      ],
-      instructions: [
-        'Preheat oven to 350°F',
-        'Mix dry ingredients in a bowl',
-        'Cream butter and sugar together',
-        'Add eggs and vanilla, mix well',
-        'Gradually add dry ingredients',
-        'Pour into prepared pan and bake for 25–30 minutes',
-      ],
-      time: '45 min',
-    };
+  try {
+    const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
+    const response = await fetch(proxyUrl);
 
+    if (!response.ok) throw new Error(`Could not reach the page (HTTP ${response.status}).`);
+
+    const html = await response.text();
+    const recipe = parseRecipeFromHtml(html);
+
+    if (!recipe) {
+      throw new Error(
+        `No recipe data found on ${parsedUrl.hostname}. ` +
+        `The site may not support automatic import.`
+      );
+    }
+
+    recipe.sourceUrl = url;
+    recipe.source = getSourceName(parsedUrl.hostname, recipe.source);
+    importedRecipe = recipe;
     loadingArea.innerHTML = '';
 
     document.getElementById('recipePreviewArea').innerHTML = `
       <div class="recipe-preview">
-        <h5>${importedRecipe.title}</h5>
-        <div class="recipe-preview-content">
-          <p><strong>Ingredients:</strong> ${importedRecipe.ingredients.length} items</p>
-          <p><strong>Instructions:</strong> ${importedRecipe.instructions.length} steps</p>
-          <p><strong>Cook time:</strong> ${importedRecipe.time}</p>
+        <div class="recipe-preview-header">
+          <h5>${importedRecipe.title}</h5>
+          <span class="recipe-source-tag">${importedRecipe.source}</span>
+        </div>
+        ${importedRecipe.time ? `<div class="recipe-preview-meta"><span class="meta-item">${importedRecipe.time}</span></div>` : ''}
+        <div class="detail-section">
+          <h4>Ingredients</h4>
+          <ul class="ingredients-list">
+            ${importedRecipe.ingredients.map(ing => `<li>${ing}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="detail-section">
+          <h4>Instructions</h4>
+          <ol class="instructions-list">
+            ${importedRecipe.instructions.map(step => `<li>${step}</li>`).join('')}
+          </ol>
+        </div>
+      </div>
+      <div class="import-status-section">
+        <h4>How would you like to save this?</h4>
+        <div class="status-toggle">
+          <button class="status-btn" id="statusWantToTry" onclick="selectStatus('wantToTry')">Want to Try</button>
+          <button class="status-btn" id="statusAlreadyCooked" onclick="selectStatus('alreadyCooked')">Already Cooked</button>
+        </div>
+        <div id="cookedDetails" class="cooked-details">
+          <div class="rating-input-row">
+            <span>Your rating:</span>
+            <div class="star-input" id="starInput">
+              <span onclick="setRating(1)">★</span>
+              <span onclick="setRating(2)">★</span>
+              <span onclick="setRating(3)">★</span>
+              <span onclick="setRating(4)">★</span>
+              <span onclick="setRating(5)">★</span>
+            </div>
+          </div>
+          <textarea id="recipeNotes" class="recipe-notes" placeholder="Add notes, substitutions, or tips... (optional)"></textarea>
         </div>
       </div>
     `;
+  } catch (err) {
+    loadingArea.innerHTML = `
+      <div class="import-error">${err.message}</div>
+    `;
+  } finally {
+    importBtn.disabled = false;
+  }
+}
 
-    document.getElementById('saveRecipeBtn').disabled = false;
-  }, 2000);
+function parseRecipeFromHtml(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
+
+  for (const script of scripts) {
+    try {
+      const data = JSON.parse(script.textContent);
+      const schema = findRecipeSchema(data);
+      if (schema) return extractFromSchema(schema);
+    } catch (_) {}
+  }
+
+  return null;
+}
+
+function findRecipeSchema(data) {
+  if (!data) return null;
+
+  if (Array.isArray(data)) {
+    for (const item of data) {
+      const found = findRecipeSchema(item);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  if (data['@graph']) return findRecipeSchema(data['@graph']);
+
+  const type = data['@type'];
+  if (type === 'Recipe' || (Array.isArray(type) && type.includes('Recipe'))) {
+    return data;
+  }
+
+  return null;
+}
+
+function extractFromSchema(schema) {
+  function parseDuration(iso) {
+    if (!iso) return null;
+    const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
+    if (!match) return null;
+    const h = parseInt(match[1] || 0);
+    const m = parseInt(match[2] || 0);
+    if (h > 0 && m > 0) return `${h}h ${m}m`;
+    if (h > 0) return `${h}h`;
+    if (m > 0) return `${m} min`;
+    return null;
+  }
+
+  const ingredients = (schema.recipeIngredient || []).filter(Boolean);
+
+  const instructions = [];
+  for (const step of [].concat(schema.recipeInstructions || [])) {
+    if (typeof step === 'string') {
+      instructions.push(step.trim());
+    } else if (step['@type'] === 'HowToSection') {
+      for (const s of [].concat(step.itemListElement || [])) {
+        const text = typeof s === 'string' ? s : (s.text || s.name || '');
+        if (text) instructions.push(text.trim());
+      }
+    } else {
+      const text = step.text || step.name || '';
+      if (text) instructions.push(text.trim());
+    }
+  }
+
+  const time = parseDuration(schema.totalTime)
+    || parseDuration(schema.cookTime)
+    || parseDuration(schema.prepTime);
+
+  const publisher = schema.publisher?.name
+    || (Array.isArray(schema.author) ? schema.author[0]?.name : schema.author?.name)
+    || null;
+
+  return {
+    title: schema.name || 'Imported Recipe',
+    ingredients: ingredients.length ? ingredients : ['No ingredients found'],
+    instructions: instructions.length ? instructions : ['No instructions found'],
+    time,
+    source: publisher,
+  };
+}
+
+function selectStatus(status) {
+  importedRecipe.status = status;
+
+  document.querySelectorAll('.status-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById(status === 'wantToTry' ? 'statusWantToTry' : 'statusAlreadyCooked').classList.add('active');
+
+  document.getElementById('cookedDetails').style.display = status === 'alreadyCooked' ? 'block' : 'none';
+  document.getElementById('saveRecipeBtn').disabled = false;
+}
+
+function setRating(n) {
+  importedRecipe.rating = n;
+  document.querySelectorAll('#starInput span').forEach((star, i) => {
+    star.classList.toggle('active', i < n);
+  });
+}
+
+// ── Save Imported Recipe ──────────────────────────────────────────────────────
+
+function saveImportedRecipe() {
+  if (!importedRecipe || !importedRecipe.status) return;
+
+  const status = importedRecipe.status;
+  const rating = importedRecipe.rating || 0;
+  const notes = document.getElementById('recipeNotes')?.value.trim() || '';
+
+  const sourceKey = normalizeRecipeUrl(importedRecipe.sourceUrl);
+  const existing = recipes.find(r => r.sourceUrl && normalizeRecipeUrl(r.sourceUrl) === sourceKey);
+
+  if (existing) {
+    if (status === 'alreadyCooked') {
+      existing.comments.unshift({
+        author: 'You',
+        initials: 'YO',
+        text: notes || 'Made this recipe!',
+        rating,
+      });
+      if (rating > 0) {
+        const rated = existing.comments.filter(c => c.rating > 0);
+        existing.rating = Math.round((rated.reduce((s, c) => s + c.rating, 0) / rated.length) * 10) / 10;
+        existing.reviews = rated.length;
+      }
+    }
+    renderRecipes();
+    closeModal();
+    openRecipeDetail(existing.id);
+    return;
+  }
+
+  const newRecipe = {
+    id: urlToId(importedRecipe.sourceUrl),
+    sourceUrl: importedRecipe.sourceUrl,
+    title: importedRecipe.title,
+    source: importedRecipe.source,
+    author: 'You',
+    authorInitials: 'YO',
+    isFriend: false,
+    time: importedRecipe.time || 'N/A',
+    rating: status === 'alreadyCooked' && rating > 0 ? rating : 0,
+    reviews: status === 'alreadyCooked' && rating > 0 ? 1 : 0,
+    tags: [],
+    photos: uploadedPhotos.map(p => p.url),
+    ingredients: importedRecipe.ingredients,
+    instructions: importedRecipe.instructions,
+    status,
+    comments: [],
+  };
+
+  if (status === 'alreadyCooked' && (rating > 0 || notes)) {
+    newRecipe.comments.push({
+      author: 'You',
+      initials: 'YO',
+      text: notes || 'Made this recipe!',
+      rating,
+    });
+  }
+
+  recipes.unshift(newRecipe);
+  renderRecipes();
+  closeModal();
 }
 
 // ── Modal Helpers ─────────────────────────────────────────────────────────────
 
 function closeModal() {
   document.getElementById('recipeModal').classList.remove('active');
+  document.getElementById('modalSubtitle').textContent = '';
 }
 
 // Close when clicking the backdrop
