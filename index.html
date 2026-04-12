@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Word by Mouth - Social Recipe Discovery</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <div class="header-content">
+        <div class="logo">Word by Mouth</div>
+        <nav>
+          <button class="active" onclick="switchView('feed')">Feed</button>
+          <button onclick="switchView('discover')">Discover</button>
+          <button onclick="switchView('friends')">Friends</button>
+          <button onclick="switchView('profile')">Profile</button>
+        </nav>
+      </div>
+    </header>
+
+    <div class="main-content">
+      <aside class="sidebar">
+        <h3>My Recipe Books</h3>
+        <div class="recipe-book active" onclick="filterByBook('all')">
+          <div class="book-icon">ALL</div>
+          <div class="book-info">
+            <div class="book-name">All Recipes</div>
+            <div class="book-count">47 recipes</div>
+          </div>
+        </div>
+        <div class="recipe-book" onclick="filterByBook('weeknight')">
+          <div class="book-icon">WN</div>
+          <div class="book-info">
+            <div class="book-name">Weeknight Dinners</div>
+            <div class="book-count">12 recipes</div>
+          </div>
+        </div>
+        <div class="recipe-book" onclick="filterByBook('comfort')">
+          <div class="book-icon">CF</div>
+          <div class="book-info">
+            <div class="book-name">Comfort Food</div>
+            <div class="book-count">8 recipes</div>
+          </div>
+        </div>
+        <div class="recipe-book" onclick="filterByBook('healthy')">
+          <div class="book-icon">HF</div>
+          <div class="book-info">
+            <div class="book-name">Healthy Favorites</div>
+            <div class="book-count">15 recipes</div>
+          </div>
+        </div>
+        <div class="recipe-book" onclick="filterByBook('desserts')">
+          <div class="book-icon">DS</div>
+          <div class="book-info">
+            <div class="book-name">Desserts</div>
+            <div class="book-count">12 recipes</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 32px;">Friends</h3>
+        <div class="recipe-book" onclick="filterByFriend('sarah')">
+          <div class="author-avatar" style="width: 32px; height: 32px; font-size: 12px; background: #8B7F76;">SK</div>
+          <div class="book-info">
+            <div class="book-name">Sarah Kim</div>
+            <div class="book-count">23 recipes</div>
+          </div>
+        </div>
+        <div class="recipe-book" onclick="filterByFriend('mike')">
+          <div class="author-avatar" style="width: 32px; height: 32px; font-size: 12px; background: #9B8A7D;">MC</div>
+          <div class="book-info">
+            <div class="book-name">Mike Chen</div>
+            <div class="book-count">18 recipes</div>
+          </div>
+        </div>
+        <div class="recipe-book" onclick="filterByFriend('emma')">
+          <div class="author-avatar" style="width: 32px; height: 32px; font-size: 12px; background: #7A6E64;">EJ</div>
+          <div class="book-info">
+            <div class="book-name">Emma Johnson</div>
+            <div class="book-count">31 recipes</div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="content-area">
+        <div class="page-header">
+          <h1 class="page-title">Your Recipe Feed</h1>
+          <p class="page-subtitle">Discover what your friends are cooking and sharing</p>
+        </div>
+
+        <input type="text" class="search-bar" placeholder="Search recipes, ingredients, or friends...">
+
+        <div class="ai-suggestion">
+          <h3>Personalized suggestions</h3>
+          <p>Based on your saved recipes and what your friends are cooking</p>
+          <div class="suggestion-chips">
+            <div class="chip">Pasta Night</div>
+            <div class="chip">Quick Lunches</div>
+            <div class="chip">Mexican Food</div>
+            <div class="chip">Meal Prep</div>
+          </div>
+        </div>
+
+        <div class="filter-tabs">
+          <button class="filter-tab active" onclick="filterRecipes('all')">All Recipes</button>
+          <button class="filter-tab" onclick="filterRecipes('friends')">Friends Only</button>
+          <button class="filter-tab" onclick="filterRecipes('trending')">Trending</button>
+          <button class="filter-tab" onclick="filterRecipes('saved')">Saved</button>
+        </div>
+
+        <div class="recipe-grid" id="recipeGrid">
+          <!-- Recipes populated by JavaScript -->
+        </div>
+      </main>
+    </div>
+
+    <button class="add-recipe-btn" onclick="openAddRecipe()">+</button>
+  </div>
+
+  <!-- Recipe Detail / Add Recipe Modal -->
+  <div class="modal" id="recipeModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Recipe Details</h2>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,845 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #F5F1ED;
+  color: #3D3634;
+  line-height: 1.6;
+}
+
+/* ── Layout ─────────────────────────────────────────── */
+
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #FDFCFB;
+  min-height: 100vh;
+}
+
+.main-content {
+  display: flex;
+}
+
+/* ── Header ─────────────────────────────────────────── */
+
+header {
+  background: #FDFCFB;
+  border-bottom: 1px solid #E8E2DC;
+  padding: 20px 32px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 600;
+  color: #3D3634;
+  letter-spacing: -0.3px;
+}
+
+nav {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+}
+
+nav button {
+  background: none;
+  border: none;
+  color: #8B7F76;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 0;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+nav button.active,
+nav button:hover {
+  color: #3D3634;
+}
+
+/* ── Sidebar ─────────────────────────────────────────── */
+
+.sidebar {
+  width: 260px;
+  border-right: 1px solid #E8E2DC;
+  padding: 32px 24px;
+  height: calc(100vh - 60px);
+  overflow-y: auto;
+  background: #F9F6F2;
+}
+
+.sidebar h3 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #A89A8E;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.recipe-book {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 4px;
+  background: transparent;
+}
+
+.recipe-book:hover {
+  background: #F0EBE5;
+}
+
+.recipe-book.active {
+  background: #5C8A7D;
+  color: white;
+}
+
+.book-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  background: #E8E2DC;
+  color: #6B5F54;
+}
+
+.recipe-book.active .book-icon {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.book-info {
+  flex: 1;
+}
+
+.book-name {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.book-count {
+  font-size: 12px;
+  color: #999;
+}
+
+/* ── Content Area ────────────────────────────────────── */
+
+.content-area {
+  flex: 1;
+  padding: 32px;
+  overflow-y: auto;
+  height: calc(100vh - 60px);
+}
+
+.page-header {
+  margin-bottom: 40px;
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+  color: #3D3634;
+}
+
+.page-subtitle {
+  color: #8B7F76;
+  font-size: 14px;
+}
+
+/* ── Search Bar ─────────────────────────────────────── */
+
+.search-bar {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #E8E2DC;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 32px;
+  background: #F9F6F2;
+  color: #3D3634;
+}
+
+.search-bar:focus {
+  outline: none;
+  border-color: #5C8A7D;
+  background: #FDFCFB;
+}
+
+.search-bar::placeholder {
+  color: #A89A8E;
+}
+
+/* ── AI Suggestion Banner ────────────────────────────── */
+
+.ai-suggestion {
+  background: #5C8A7D;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 32px;
+  color: white;
+}
+
+.ai-suggestion h3 {
+  font-size: 15px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+}
+
+.ai-suggestion p {
+  opacity: 0.9;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #E8F4F5;
+}
+
+.suggestion-chips {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 8px 14px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.chip:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ── Filter Tabs ─────────────────────────────────────── */
+
+.filter-tabs {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 32px;
+  border-bottom: 1px solid #E8E2DC;
+}
+
+.filter-tab {
+  padding: 12px 0;
+  background: none;
+  border: none;
+  color: #8B7F76;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  margin-bottom: -1px;
+}
+
+.filter-tab.active {
+  color: #3D3634;
+  border-bottom-color: #5C8A7D;
+}
+
+/* ── Recipe Grid & Cards ─────────────────────────────── */
+
+.recipe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.recipe-card {
+  background: #FDFCFB;
+  border: 1px solid #E8E2DC;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.recipe-card:hover {
+  box-shadow: 0 2px 12px rgba(92, 138, 125, 0.1);
+  transform: translateY(-1px);
+  border-color: #5C8A7D;
+}
+
+.recipe-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  background: linear-gradient(135deg, #E8E2DC 0%, #D4C9BE 100%);
+}
+
+.recipe-content {
+  padding: 20px;
+}
+
+.recipe-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #3D3634;
+  letter-spacing: -0.2px;
+}
+
+.recipe-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #A89A8E;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Author / Avatar ─────────────────────────────────── */
+
+.recipe-author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #F5F1ED;
+}
+
+.author-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #6B5F54;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.author-info {
+  flex: 1;
+  font-size: 13px;
+}
+
+.author-name {
+  font-weight: 500;
+  color: #3D3634;
+}
+
+.friend-tag {
+  font-size: 10px;
+  color: #4C9FA8;
+  background: #E8F4F5;
+  padding: 3px 8px;
+  border-radius: 3px;
+  margin-left: 6px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+/* ── Ratings ─────────────────────────────────────────── */
+
+.rating-display {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.star {
+  color: #E89274;
+  font-size: 14px;
+}
+
+.rating-text {
+  color: #3D3634;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* ── Add Recipe FAB ──────────────────────────────────── */
+
+.add-recipe-btn {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #E89274;
+  color: white;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(232, 146, 116, 0.3);
+  transition: transform 0.2s;
+}
+
+.add-recipe-btn:hover {
+  transform: scale(1.05);
+  background: #E07D5F;
+}
+
+/* ── Modal ───────────────────────────────────────────── */
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(61, 54, 52, 0.4);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.active {
+  display: flex;
+}
+
+.modal-content {
+  background: #FDFCFB;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  padding: 24px 28px;
+  border-bottom: 1px solid #E8E2DC;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: #3D3634;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #A89A8E;
+  line-height: 1;
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  color: #3D3634;
+}
+
+.modal-body {
+  padding: 28px;
+}
+
+/* ── Recipe Detail ───────────────────────────────────── */
+
+.recipe-detail-image {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #E8E2DC 0%, #D4C9BE 100%);
+}
+
+.detail-section {
+  margin-bottom: 28px;
+}
+
+.detail-section h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  letter-spacing: -0.2px;
+  color: #3D3634;
+}
+
+.ingredients-list {
+  list-style: none;
+}
+
+.ingredients-list li {
+  padding: 10px 0;
+  border-bottom: 1px solid #F5F1ED;
+  font-size: 14px;
+  color: #6B5F54;
+}
+
+.ingredients-list li:last-child {
+  border-bottom: none;
+}
+
+.instructions-list {
+  list-style: none;
+  counter-reset: step-counter;
+}
+
+.instructions-list li {
+  counter-increment: step-counter;
+  padding: 14px 0;
+  padding-left: 40px;
+  position: relative;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #6B5F54;
+}
+
+.instructions-list li::before {
+  content: counter(step-counter);
+  position: absolute;
+  left: 0;
+  top: 14px;
+  width: 26px;
+  height: 26px;
+  background: #5C8A7D;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ── Comments ────────────────────────────────────────── */
+
+.comments-section {
+  margin-top: 32px;
+  padding-top: 28px;
+  border-top: 1px solid #E8E2DC;
+}
+
+.comment {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.comment-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #6B5F54;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.comment-content {
+  flex: 1;
+}
+
+.comment-author {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #3D3634;
+}
+
+.comment-text {
+  font-size: 14px;
+  color: #8B7F76;
+  line-height: 1.5;
+}
+
+.comment-rating {
+  margin-top: 8px;
+}
+
+/* ── Action Buttons ──────────────────────────────────── */
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #E8E2DC;
+  background: #FDFCFB;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #3D3634;
+}
+
+.action-btn:hover {
+  background: #F9F6F2;
+  border-color: #D4C9BE;
+}
+
+.action-btn.primary {
+  background: #E89274;
+  color: white;
+  border-color: #E89274;
+}
+
+.action-btn.primary:hover {
+  background: #E07D5F;
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Add Recipe Form ─────────────────────────────────── */
+
+.upload-section {
+  margin-bottom: 24px;
+}
+
+.upload-section h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #3D3634;
+}
+
+.url-input-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.url-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #E8E2DC;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #F9F6F2;
+  color: #3D3634;
+}
+
+.url-input:focus {
+  outline: none;
+  border-color: #5C8A7D;
+  background: #FDFCFB;
+}
+
+.import-btn {
+  padding: 12px 20px;
+  background: #5C8A7D;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.import-btn:hover {
+  background: #4E7A6D;
+}
+
+.import-btn:disabled {
+  background: #A89A8E;
+  cursor: not-allowed;
+}
+
+/* ── Photo Upload ────────────────────────────────────── */
+
+.photo-upload-area {
+  border: 2px dashed #E8E2DC;
+  border-radius: 8px;
+  padding: 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #F9F6F2;
+}
+
+.photo-upload-area:hover {
+  border-color: #5C8A7D;
+  background: #F5F1ED;
+}
+
+.photo-upload-area.dragover {
+  border-color: #5C8A7D;
+  background: #E8F4F5;
+}
+
+.upload-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 12px;
+  background: #E8E2DC;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #6B5F54;
+}
+
+.upload-text {
+  font-size: 14px;
+  color: #6B5F54;
+  margin-bottom: 4px;
+}
+
+.upload-hint {
+  font-size: 12px;
+  color: #A89A8E;
+}
+
+.photo-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.photo-preview-item {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #F5F1ED;
+}
+
+.photo-preview-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  background: rgba(61, 54, 52, 0.8);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.photo-remove:hover {
+  background: rgba(61, 54, 52, 1);
+}
+
+/* ── Loading & Preview ───────────────────────────────── */
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #E8F4F5;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #E8E2DC;
+  border-top-color: #4C9FA8;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 14px;
+  color: #4C9FA8;
+  font-weight: 500;
+}
+
+.recipe-preview {
+  background: #F9F6F2;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.recipe-preview h5 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #3D3634;
+  margin-bottom: 12px;
+}
+
+.recipe-preview-content {
+  font-size: 14px;
+  color: #6B5F54;
+  line-height: 1.6;
+}
+
+.divider {
+  height: 1px;
+  background: #E8E2DC;
+  margin: 24px 0;
+}
