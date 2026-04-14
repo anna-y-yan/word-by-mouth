@@ -1,6 +1,10 @@
 // ── Recipe Data ───────────────────────────────────────────────────────────────
+// Populated from the API on load; seed data lives in server/seed.js
 
-const recipes = [
+let recipes = [];
+
+// (dead code start — kept for reference; remove once API is confirmed working)
+const _unusedSeedRef = [
   {
     id: 1,
     title: 'Creamy Tuscan Chicken',
@@ -189,9 +193,16 @@ const recipes = [
     comments: [],
   },
 ];
+// (dead code end)
 
-// Initialize photos array on seed recipes
-recipes.forEach(r => { r.photos = []; });
+// ── Cook Books ────────────────────────────────────────────────────────────────
+
+const COOK_BOOKS = [
+  { id: 'weeknight', name: 'Weeknight Dinners', icon: 'WN', color: '#7A9E7E' },
+  { id: 'comfort',   name: 'Comfort Food',      icon: 'CF', color: '#C4876A' },
+  { id: 'healthy',   name: 'Healthy Favorites',  icon: 'HF', color: '#6A9EA8' },
+  { id: 'desserts',  name: 'Desserts',            icon: 'DS', color: '#C4A068' },
+];
 
 // ── State ─────────────────────────────────────────────────────────────────────
 
@@ -207,61 +218,62 @@ function getPlaceholderColor(title) {
   return palette[Math.abs(hash) % palette.length];
 }
 
-function renderRecipes(recipesToShow = recipes) {
-  const grid = document.getElementById('recipeGrid');
-  grid.innerHTML = recipesToShow.map(recipe => {
-    const topComment = recipe.comments[0] || null;
-    const photoUrl = recipe.photos && recipe.photos.length > 0 ? recipe.photos[0] : null;
-    const placeholderColor = getPlaceholderColor(recipe.title);
+function feedCardHtml(recipe) {
+  const topComment = recipe.comments[0] || null;
+  const photoUrl = recipe.photos && recipe.photos.length > 0 ? recipe.photos[0] : null;
+  const placeholderColor = getPlaceholderColor(recipe.title);
 
-    return `
-      <div class="feed-card" onclick="openRecipeDetail(${recipe.id})">
+  return `
+    <div class="feed-card" onclick="openRecipeDetail(${recipe.id})">
 
-        <div class="feed-card-header">
-          <div class="author-avatar">${recipe.authorInitials}</div>
-          <div class="author-info">
-            <div class="author-name">
-              ${recipe.author}
-              ${recipe.isFriend ? '<span class="friend-tag">Friend</span>' : ''}
-            </div>
-            <div class="feed-card-tags">
-              ${recipe.status === 'wantToTry' ? '<span class="status-tag want">Want to Try</span>' : ''}
-              ${recipe.status === 'alreadyCooked' ? '<span class="status-tag cooked">Cooked</span>' : ''}
-            </div>
+      <div class="feed-card-header">
+        <div class="author-avatar">${recipe.authorInitials}</div>
+        <div class="author-info">
+          <div class="author-name">
+            ${recipe.author}
+            ${recipe.isFriend ? '<span class="friend-tag">Friend</span>' : ''}
           </div>
-          ${recipe.source ? `<span class="recipe-source-tag">${recipe.source}</span>` : ''}
-        </div>
-
-        <div class="feed-photo" style="${!photoUrl ? `background-color: ${placeholderColor};` : ''}">
-          ${photoUrl
-            ? `<img src="${photoUrl}" class="feed-photo-img" alt="${recipe.title}">`
-            : `<span class="feed-photo-placeholder-text">${recipe.title}</span>`
-          }
-        </div>
-
-        <div class="feed-card-body">
-          <div class="feed-title-row">
-            <h3 class="feed-recipe-title">${recipe.title}</h3>
-            <div class="feed-recipe-meta">
-              ${recipe.time && recipe.time !== 'N/A' ? `<span class="meta-item">${recipe.time}</span>` : ''}
-              ${recipe.rating > 0 ? `<span class="rating-display"><span class="star">★</span><span class="rating-text">${recipe.rating}</span></span>` : ''}
-            </div>
+          <div class="feed-card-tags">
+            ${recipe.status === 'wantToTry' ? '<span class="status-tag want">Want to Try</span>' : ''}
+            ${recipe.status === 'alreadyCooked' ? '<span class="status-tag cooked">Cooked</span>' : ''}
           </div>
-
-          ${topComment ? `
-            <div class="feed-note">
-              <p class="feed-note-text">"${topComment.text}"</p>
-              <div class="feed-note-footer">
-                ${topComment.rating > 0 ? `<span class="feed-note-stars">${'★'.repeat(topComment.rating)}</span>` : ''}
-                <span class="feed-note-author">— ${topComment.author}</span>
-              </div>
-            </div>
-          ` : ''}
         </div>
-
+        ${recipe.source ? `<span class="recipe-source-tag">${recipe.source}</span>` : ''}
       </div>
-    `;
-  }).join('');
+
+      <div class="feed-photo" style="${!photoUrl ? `background-color: ${placeholderColor};` : ''}">
+        ${photoUrl
+          ? `<img src="${photoUrl}" class="feed-photo-img" alt="${recipe.title}">`
+          : `<span class="feed-photo-placeholder-text">${recipe.title}</span>`
+        }
+      </div>
+
+      <div class="feed-card-body">
+        <div class="feed-title-row">
+          <h3 class="feed-recipe-title">${recipe.title}</h3>
+          <div class="feed-recipe-meta">
+            ${recipe.time && recipe.time !== 'N/A' ? `<span class="meta-item">${recipe.time}</span>` : ''}
+            ${recipe.rating > 0 ? `<span class="rating-display"><span class="star">★</span><span class="rating-text">${recipe.rating}</span></span>` : ''}
+          </div>
+        </div>
+
+        ${topComment ? `
+          <div class="feed-note">
+            <p class="feed-note-text">"${topComment.text}"</p>
+            <div class="feed-note-footer">
+              ${topComment.rating > 0 ? `<span class="feed-note-stars">${'★'.repeat(topComment.rating)}</span>` : ''}
+              <span class="feed-note-author">— ${topComment.author}</span>
+            </div>
+          </div>
+        ` : ''}
+      </div>
+
+    </div>
+  `;
+}
+
+function renderRecipes(recipesToShow = recipes) {
+  document.getElementById('recipeGrid').innerHTML = recipesToShow.map(feedCardHtml).join('');
 }
 
 // ── Recipe Detail Modal ───────────────────────────────────────────────────────
@@ -686,67 +698,73 @@ function setRating(n) {
 
 // ── Save Imported Recipe ──────────────────────────────────────────────────────
 
-function saveImportedRecipe() {
+async function saveImportedRecipe() {
   if (!importedRecipe || !importedRecipe.status) return;
 
   const status = importedRecipe.status;
   const rating = importedRecipe.rating || 0;
   const notes = document.getElementById('recipeNotes')?.value.trim() || '';
 
-  const sourceKey = normalizeRecipeUrl(importedRecipe.sourceUrl);
-  const existing = recipes.find(r => r.sourceUrl && normalizeRecipeUrl(r.sourceUrl) === sourceKey);
+  const saveBtn = document.getElementById('saveRecipeBtn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving...';
 
-  if (existing) {
-    if (status === 'alreadyCooked') {
-      existing.comments.unshift({
-        author: 'You',
-        initials: 'YO',
-        text: notes || 'Made this recipe!',
-        rating,
-      });
-      if (rating > 0) {
-        const rated = existing.comments.filter(c => c.rating > 0);
-        existing.rating = Math.round((rated.reduce((s, c) => s + c.rating, 0) / rated.length) * 10) / 10;
-        existing.reviews = rated.length;
-      }
-    }
-    renderRecipes();
-    closeModal();
-    openRecipeDetail(existing.id);
-    return;
-  }
-
-  const newRecipe = {
-    id: urlToId(importedRecipe.sourceUrl),
-    sourceUrl: importedRecipe.sourceUrl,
-    title: importedRecipe.title,
-    source: importedRecipe.source,
-    author: 'You',
+  const payload = {
+    id:             urlToId(importedRecipe.sourceUrl),
+    sourceUrl:      importedRecipe.sourceUrl,
+    source:         importedRecipe.source,
+    title:          importedRecipe.title,
+    author:         'You',
     authorInitials: 'YO',
-    isFriend: false,
-    time: importedRecipe.time || 'N/A',
-    rating: status === 'alreadyCooked' && rating > 0 ? rating : 0,
-    reviews: status === 'alreadyCooked' && rating > 0 ? 1 : 0,
-    tags: [],
-    photos: uploadedPhotos.map(p => p.url),
-    ingredients: importedRecipe.ingredients,
-    instructions: importedRecipe.instructions,
+    isFriend:       false,
+    time:           importedRecipe.time || null,
+    tags:           [],
+    photos:         uploadedPhotos.map(p => p.url),
+    ingredients:    importedRecipe.ingredients,
+    instructions:   importedRecipe.instructions,
     status,
-    comments: [],
+    // Include the review in the same request so the server can attach it atomically
+    comment: status === 'alreadyCooked' ? {
+      author:   'You',
+      initials: 'YO',
+      text:     notes || 'Made this recipe!',
+      rating,
+    } : null,
   };
 
-  if (status === 'alreadyCooked' && (rating > 0 || notes)) {
-    newRecipe.comments.push({
-      author: 'You',
-      initials: 'YO',
-      text: notes || 'Made this recipe!',
-      rating,
+  try {
+    const res = await fetch('/api/recipes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
     });
-  }
 
-  recipes.unshift(newRecipe);
-  renderRecipes();
-  closeModal();
+    const data = await res.json();
+
+    if (res.status === 201) {
+      // Brand new recipe
+      recipes.unshift(data);
+      renderRecipes();
+      closeModal();
+    } else if (res.status === 409) {
+      // Duplicate URL — server already attached the review; sync local state
+      const idx = recipes.findIndex(r => r.id === data.existing.id);
+      if (idx >= 0) {
+        recipes[idx] = data.existing;
+      } else {
+        recipes.unshift(data.existing);
+      }
+      renderRecipes();
+      closeModal();
+      openRecipeDetail(data.existing.id);
+    } else {
+      throw new Error(data.error || 'Failed to save recipe');
+    }
+  } catch (err) {
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save Recipe';
+    alert(`Could not save recipe: ${err.message}`);
+  }
 }
 
 // ── Modal Helpers ─────────────────────────────────────────────────────────────
@@ -799,9 +817,171 @@ function filterByFriend(friend) {
 function switchView(view) {
   document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
   event.target.classList.add('active');
-  // Additional view-switching logic goes here
+
+  const feedView    = document.getElementById('feedView');
+  const profileView = document.getElementById('profileView');
+
+  if (view === 'profile') {
+    feedView.style.display    = 'none';
+    profileView.style.display = 'block';
+    renderProfile();
+  } else {
+    feedView.style.display    = 'flex';
+    profileView.style.display = 'none';
+  }
+}
+
+// ── Profile Page ──────────────────────────────────────────────────────────────
+
+function renderProfile() {
+  const myRecipes  = recipes.filter(r => r.author === 'You');
+  const cooked     = recipes.filter(r => r.status === 'alreadyCooked');
+  const wantToTry  = recipes.filter(r => r.status === 'wantToTry');
+
+  document.getElementById('profileView').innerHTML = `
+    <div class="profile-header">
+      <div class="profile-avatar-lg">YO</div>
+      <div class="profile-info">
+        <h2 class="profile-name">Your Profile</h2>
+        <div class="profile-stats">
+          <div class="profile-stat">
+            <span class="stat-number">${myRecipes.length}</span>
+            <span class="stat-label">posts</span>
+          </div>
+          <div class="profile-stat">
+            <span class="stat-number">${cooked.length}</span>
+            <span class="stat-label">cooked</span>
+          </div>
+          <div class="profile-stat">
+            <span class="stat-number">${wantToTry.length}</span>
+            <span class="stat-label">want to try</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-tabs">
+      <button class="profile-tab active" data-tab="recent"    onclick="switchProfileTab('recent')">Recent Posts</button>
+      <button class="profile-tab"        data-tab="wantToTry" onclick="switchProfileTab('wantToTry')">Want to Try</button>
+      <button class="profile-tab"        data-tab="topRated"  onclick="switchProfileTab('topRated')">Top Rated</button>
+      <button class="profile-tab"        data-tab="cookBooks" onclick="switchProfileTab('cookBooks')">Cook Books</button>
+    </div>
+
+    <div id="profileContent" class="profile-content"></div>
+  `;
+
+  switchProfileTab('recent');
+}
+
+function switchProfileTab(tab) {
+  document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+  const activeTab = document.querySelector(`.profile-tab[data-tab="${tab}"]`);
+  if (activeTab) activeTab.classList.add('active');
+
+  const content = document.getElementById('profileContent');
+
+  if (tab === 'recent') {
+    const mine = recipes.filter(r => r.author === 'You');
+    content.innerHTML = mine.length
+      ? `<div class="profile-feed">${mine.map(feedCardHtml).join('')}</div>`
+      : emptyStateHtml('No posts yet', 'Import your first recipe using the + button to get started.');
+
+  } else if (tab === 'wantToTry') {
+    const list = recipes.filter(r => r.status === 'wantToTry');
+    content.innerHTML = list.length
+      ? `<div class="compact-grid">${list.map(compactCardHtml).join('')}</div>`
+      : emptyStateHtml('Nothing saved yet', 'When you import a recipe and mark it "Want to Try", it appears here.');
+
+  } else if (tab === 'topRated') {
+    const list = recipes
+      .filter(r => r.status === 'alreadyCooked' && r.rating > 0)
+      .sort((a, b) => b.rating - a.rating);
+    content.innerHTML = list.length
+      ? `<div class="profile-feed">${list.map(feedCardHtml).join('')}</div>`
+      : emptyStateHtml('No rated recipes yet', 'Cook a recipe and leave a rating to see it here.');
+
+  } else if (tab === 'cookBooks') {
+    content.innerHTML = cookBooksHtml();
+  }
+}
+
+function compactCardHtml(recipe) {
+  const photoUrl = recipe.photos && recipe.photos.length > 0 ? recipe.photos[0] : null;
+  const color    = getPlaceholderColor(recipe.title);
+  return `
+    <div class="compact-card" onclick="openRecipeDetail(${recipe.id})">
+      <div class="compact-card-photo" style="${!photoUrl ? `background-color: ${color};` : ''}">
+        ${photoUrl
+          ? `<img src="${photoUrl}" class="compact-card-img" alt="${recipe.title}">`
+          : `<span class="compact-card-placeholder">${recipe.title[0]}</span>`
+        }
+      </div>
+      <div class="compact-card-body">
+        <h4 class="compact-card-title">${recipe.title}</h4>
+        ${recipe.source ? `<span class="recipe-source">${recipe.source}</span>` : ''}
+        ${recipe.time && recipe.time !== 'N/A' ? `<span class="compact-card-time">${recipe.time}</span>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function cookBooksHtml(activeBookId = null) {
+  const bookCards = COOK_BOOKS.map(book => {
+    const count = recipes.filter(r => (r.tags || []).includes(book.id)).length;
+    const isActive = book.id === activeBookId;
+    return `
+      <div class="cook-book-card ${isActive ? 'active' : ''}" onclick="openCookBook('${book.id}')">
+        <div class="cook-book-icon" style="background: ${book.color};">${book.icon}</div>
+        <div class="cook-book-info">
+          <div class="cook-book-name">${book.name}</div>
+          <div class="cook-book-count">${count} recipe${count !== 1 ? 's' : ''}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const bookRecipes = activeBookId
+    ? recipes.filter(r => (r.tags || []).includes(activeBookId))
+    : [];
+
+  return `
+    <div class="cook-books-grid">${bookCards}</div>
+    ${activeBookId ? `
+      <div class="cook-book-recipes">
+        ${bookRecipes.length
+          ? `<div class="compact-grid">${bookRecipes.map(compactCardHtml).join('')}</div>`
+          : emptyStateHtml('No recipes in this book yet', 'Tag imported recipes to add them here.')
+        }
+      </div>
+    ` : ''}
+  `;
+}
+
+function openCookBook(bookId) {
+  document.getElementById('profileContent').innerHTML = cookBooksHtml(bookId);
+}
+
+function emptyStateHtml(title, subtitle) {
+  return `
+    <div class="empty-state">
+      <div class="empty-state-icon">○</div>
+      <h3 class="empty-state-title">${title}</h3>
+      <p class="empty-state-subtitle">${subtitle}</p>
+    </div>
+  `;
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 
-renderRecipes();
+async function loadRecipes() {
+  try {
+    const res = await fetch('/api/recipes');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    recipes = await res.json();
+  } catch (err) {
+    console.error('Failed to load recipes:', err);
+  }
+  renderRecipes();
+}
+
+loadRecipes();

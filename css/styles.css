@@ -22,6 +22,18 @@ body {
 
 .main-content {
   display: flex;
+  min-height: calc(100vh - 80px);
+}
+
+.feed-view {
+  display: flex;
+  flex: 1;
+}
+
+.profile-view {
+  flex: 1;
+  padding: 40px 48px;
+  max-width: 900px;
 }
 
 /* ── Header ─────────────────────────────────────────── */
@@ -41,11 +53,10 @@ header {
   justify-content: space-between;
 }
 
-.logo {
-  font-size: 20px;
-  font-weight: 600;
-  color: #3D3634;
-  letter-spacing: -0.3px;
+.logo-img {
+  height: 60px;
+  width: auto;
+  display: block;
 }
 
 nav {
@@ -1105,4 +1116,257 @@ nav button:hover {
   outline: none;
   border-color: #5C8A7D;
   background: #FDFCFB;
+}
+
+/* ── Profile Page ────────────────────────────────────── */
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid #E8E2DC;
+  margin-bottom: 0;
+}
+
+.profile-avatar-lg {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #6B5F54;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+
+.profile-name {
+  font-size: 22px;
+  font-weight: 600;
+  color: #3D3634;
+  letter-spacing: -0.4px;
+  margin-bottom: 10px;
+}
+
+.profile-stats {
+  display: flex;
+  gap: 28px;
+}
+
+.profile-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.stat-number {
+  font-size: 20px;
+  font-weight: 700;
+  color: #3D3634;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #A89A8E;
+}
+
+/* ── Profile Tabs ────────────────────────────────────── */
+
+.profile-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #E8E2DC;
+  margin-bottom: 28px;
+}
+
+.profile-tab {
+  padding: 14px 20px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: 14px;
+  font-weight: 500;
+  color: #A89A8E;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+}
+
+.profile-tab:hover {
+  color: #3D3634;
+}
+
+.profile-tab.active {
+  color: #3D3634;
+  border-bottom-color: #5C8A7D;
+}
+
+/* ── Profile Feed (recent posts / top rated) ─────────── */
+
+.profile-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 640px;
+}
+
+/* ── Compact Cards (want to try) ─────────────────────── */
+
+.compact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.compact-card {
+  background: #FDFCFB;
+  border: 1px solid #E8E2DC;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.compact-card:hover {
+  box-shadow: 0 3px 12px rgba(92, 138, 125, 0.12);
+  border-color: #C4B8AE;
+}
+
+.compact-card-photo {
+  width: 100%;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.compact-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.compact-card-placeholder {
+  font-size: 36px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.compact-card-body {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.compact-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #3D3634;
+  line-height: 1.3;
+}
+
+.compact-card-time {
+  font-size: 12px;
+  color: #A89A8E;
+}
+
+/* ── Cook Books ──────────────────────────────────────── */
+
+.cook-books-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.cook-book-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: #FDFCFB;
+  border: 1.5px solid #E8E2DC;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.cook-book-card:hover {
+  border-color: #5C8A7D;
+  box-shadow: 0 2px 8px rgba(92, 138, 125, 0.1);
+}
+
+.cook-book-card.active {
+  border-color: #5C8A7D;
+  background: #F2F8F6;
+}
+
+.cook-book-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.cook-book-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #3D3634;
+  margin-bottom: 2px;
+}
+
+.cook-book-count {
+  font-size: 12px;
+  color: #A89A8E;
+}
+
+.cook-book-recipes {
+  padding-top: 4px;
+}
+
+/* ── Empty State ─────────────────────────────────────── */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+}
+
+.empty-state-icon {
+  font-size: 40px;
+  color: #D9CFC8;
+  margin-bottom: 16px;
+  line-height: 1;
+}
+
+.empty-state-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #6B5F54;
+  margin-bottom: 8px;
+}
+
+.empty-state-subtitle {
+  font-size: 14px;
+  color: #A89A8E;
+  max-width: 320px;
+  line-height: 1.6;
 }

@@ -1,0 +1,4 @@
+node_modules/
+server/recipes.db
+server/recipes.db-shm
+server/recipes.db-wal

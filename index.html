@@ -10,7 +10,7 @@
   <div class="app-container">
     <header>
       <div class="header-content">
-        <div class="logo">Word by Mouth</div>
+        <img src="assets/wordofmouth1.png" alt="Word by Mouth" class="logo-img">
         <nav>
           <button class="active" onclick="switchView('feed')">Feed</button>
           <button onclick="switchView('discover')">Discover</button>
@@ -21,6 +21,7 @@
     </header>
 
     <div class="main-content">
+      <div id="feedView" class="feed-view">
       <aside class="sidebar">
         <h3>My Recipe Books</h3>
         <div class="recipe-book active" onclick="filterByBook('all')">
@@ -113,6 +114,8 @@
           <!-- Recipes populated by JavaScript -->
         </div>
       </main>
+      </div><!-- #feedView -->
+      <div id="profileView" class="profile-view" style="display:none"></div>
     </div>
 
     <button class="add-recipe-btn" onclick="openAddRecipe()">+</button>
