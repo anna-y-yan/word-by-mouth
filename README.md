@@ -1,53 +1,81 @@
 # Word by Mouth
 
-A social recipe discovery app where you can save, share, and discover recipes with friends.
+A social recipe discovery app where you can import, save, and share recipes with friends.
 
 ## Features
 
-- **Recipe Feed** — Browse recipes shared by friends, filter by trending or saved
-- **Recipe Books** — Organize recipes into themed collections (Weeknight Dinners, Comfort Food, etc.)
-- **Friend Activity** — See what your friends are cooking and read their reviews
-- **URL Import** — Paste a link from any recipe site to import ingredients and instructions automatically
-- **Photo Upload** — Attach your own photos to recipes with drag-and-drop support
-- **Personalized Suggestions** — AI-powered chips based on your saved recipes and friend activity
+- **Recipe Feed** — Browse recipes shared by friends with large photos and notes as the focal point
+- **URL Import** — Paste a link from any major recipe site (NYT Cooking, AllRecipes, Epicurious, Bon Appétit, etc.) to automatically extract the title, ingredients, instructions, and cook time via JSON-LD structured data
+- **Want to Try / Already Cooked** — Tag imported recipes with your status; add a star rating and notes when you mark a recipe as cooked
+- **Deduplication** — If a URL has already been imported, your review is attached to the existing recipe rather than creating a duplicate
+- **Source Attribution** — Recipes display the site they came from (e.g. "NYT Cooking", "Serious Eats") as a subtitle
+- **Photo Upload** — Attach your own photos to recipes with drag-and-drop support; the first photo becomes the feed card cover
+- **Profile Page** — View your posts, want-to-try list, top-rated recipes, and cook books in one place
+- **Cook Books** — Browse recipes organized into themed collections (Weeknight Dinners, Comfort Food, Healthy Favorites, Desserts)
+- **Persistent Storage** — All recipes and reviews are stored in a SQLite database via a REST API
 
 ## Project Structure
 
 ```
 word-by-mouth/
-├── index.html        # App shell and HTML structure
+├── index.html           # App shell and HTML structure
 ├── css/
-│   └── styles.css    # All styles
+│   └── styles.css       # All styles
 ├── js/
-│   └── app.js        # Recipe data, rendering, filtering, and modal logic
-└── README.md
+│   └── app.js           # Rendering, filtering, import, and profile logic
+├── assets/
+│   └── wordofmouth1.png # Logo
+├── server/
+│   ├── index.js         # Express app entry point
+│   ├── db.js            # SQLite connection and schema
+│   ├── seed.js          # Initial recipe data (runs once on first start)
+│   └── routes/
+│       └── recipes.js   # REST API routes
+└── package.json
 ```
 
 ## Getting Started
 
-No build step required — this is a plain HTML/CSS/JS project.
+### Prerequisites
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/word-by-mouth.git
-   cd word-by-mouth
-   ```
+- Node.js 18+
+- npm
 
-2. Open `index.html` in your browser, or serve it locally:
-   ```bash
-   # Python
-   python3 -m http.server 8000
+### Install & Run
 
-   # Node (npx)
-   npx serve .
-   ```
+```bash
+npm install
+npm start
+```
 
-3. Visit `http://localhost:8000`
+Then open `http://localhost:3000` in your browser.
+
+For development with auto-reload:
+
+```bash
+npm run dev
+```
+
+### Stopping the server
+
+Press `Ctrl+C` in the terminal. If you ever see a "port already in use" error:
+
+```bash
+pkill -f "node server/index.js"
+```
+
+## API
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/recipes` | All recipes with comments, newest first |
+| GET | `/api/recipes/:id` | Single recipe by ID |
+| POST | `/api/recipes` | Create a recipe (returns 409 with existing recipe if URL is a duplicate) |
+| POST | `/api/recipes/:id/comments` | Add a review to a recipe; recalculates average rating |
 
 ## Roadmap
 
-- [ ] Backend API for persistent recipe storage
-- [ ] Real URL scraping / recipe import
 - [ ] User authentication and friend connections
-- [ ] Image hosting for uploaded photos
+- [ ] Image hosting for uploaded photos (currently stored as base64)
 - [ ] Push notifications for friend activity
+- [ ] Discover and Friends views
